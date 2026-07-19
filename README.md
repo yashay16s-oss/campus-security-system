@@ -45,13 +45,14 @@ python --version
 ### Step 2 — Install required packages
 
 ```bash
-pip install flask flask-socketio
+pip install -r requirements.txt
 ```
 
-### Step 3 — Navigate to the project folder
+### Step 3 — Set up environment variables
 
 ```bash
-cd campus_security_system
+cp .env.example .env
+# then fill in SECRET_KEY and ADMIN_SEED_PASSWORD in .env
 ```
 
 ### Step 4 — Run the application
@@ -62,7 +63,7 @@ python app.py
 
 The app will:
 1. Automatically create the `database.db` file on first run
-2. Seed a default admin account
+2. Seed the admin accounts using `ADMIN_SEED_PASSWORD`
 3. Start the server at `http://localhost:5000`
 
 ### Step 5 — Open in your browser
@@ -73,11 +74,11 @@ http://localhost:5000
 
 ---
 
-## 👤 Default Accounts
+## 👤 Admin Accounts
 
-| Role           | Email               | Password  |
-|----------------|---------------------|-----------|
-| Security Admin | admin@campus.edu    | admin123  |
+Admin accounts (`admin1`/`admin2`) are seeded on first run from the
+`ADMIN_SEED_PASSWORD` environment variable — nothing is hardcoded, and
+seeding is skipped with a warning if the variable isn't set.
 
 You can register new student/staff accounts from the `/register` page.
 
@@ -164,4 +165,4 @@ pip install flask flask-socketio eventlet
 
 ---
 
-*Built as a university group project. Feel free to modify and extend!*
+*Feel free to modify and extend!*
