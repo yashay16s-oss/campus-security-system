@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Past Alerts{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1>Past Alerts</h1>
+      <p>Resolved, closed and false alarm incidents — retained for analytics</p>
+    </div>
+  </div>
+
+  <div class="filter-label-row"><span class="filter-label">Search past alerts</span></div>
+  <form method="GET" action="{{ url_for('past_alerts') }}" class="filter-bar">
+    <input type="text" name="q" value="{{ search }}" class="filter-input" placeholder="Search by incident type or description">
+    <select name="campus" class="filter-select">
+      <option value="">All campuses</option>
+      {% for c in campuses %}<option value="{{ c }}" {% if c==campus_f %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="incident_type" class="filter-select">
+      <option value="">All incident types</option>
+      {% for it in incident_types %}<option value="{{ it }}" {% if it==incident_f %}selected{% endif %}>{{ it }}</option>{% endfor %}
+    </select>
+    <select name="severity" class="filter-select">
+      <option value="">All severities</option>
+      <option value="low" {% if severity_f=='low' %}selected{% endif %}>Low</option>
+      <option value="medium" {% if severity_f=='medium' %}selected{% endif %}>Medium</option>
+      <option value="high" {% if severity_f=='high' %}selected{% endif %}>High</option>
+      <option value="critical" {% if severity_f=='critical' %}selected{% endif %}>Critical</option>
+    </select>
+    <select name="officer" class="filter-select">
+      <option value="">All officers</option>
+      {% for o in security_officers %}<option value="{{ o.id }}" {% if o.id|string==officer_f %}selected{% endif %}>{{ o.name }}</option>{% endfor %}
+    </select>
+    <input type="date" name="date_from" value="{{ date_from }}" class="filter-select" title="From date">
+    <input type="date" name="date_to" value="{{ date_to }}" class="filter-select" title="To date">
+    <button type="submit" class="btn btn-outline btn-sm">Filter</button>
+    {% if search or campus_f or incident_f or severity_f or officer_f or date_from or date_to %}
+      <a href="{{ url_for('past_alerts') }}" class="btn btn-ghost btn-sm">Clear</a>
+    {% endif %}
+  </form>
+
+  <div class="card">
+    <div class="card-header"><h2>Resolved Incidents ({{ alerts|length }} shown)</h2></div>
+    {% if alerts %}
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Type</th><th>Campus</th><th>Block</th><th>Status</th><th>Severity</th><th>Priority</th><th>Officer</th><th>Reported By</th><th>Created</th><th>Resolved</th><th>Turnaround</th></tr>
+        </thead>
+        <tbody>
+          {% for a in alerts %}
+          <tr>
+            <td class="td-muted">{{ a.id }}</td>
+            <td class="td-title">{{ a.incident_type }}</td>
+            <td class="td-muted">{{ a.campus or '—' }}</td>
+            <td class="td-muted" style="max-width:160px;font-size:.73rem;">{{ a.block or '—' }}</td>
+            <td><span class="status-badge status-{{ a.status }}">{{ a.status | replace('_',' ') | title }}</span></td>
+            <td><span class="sev-label sev-{{ a.severity }}">{{ a.severity }}</span></td>
+            <td><span class="priority-badge pri-{{ a.priority }}">{{ a.priority }}</span></td>
+            <td class="td-muted">{{ a.assigned_to }}</td>
+            <td class="td-muted">{{ a.reporter_name }}</td>
+            <td class="td-muted">{{ a.created_at[:16] }}</td>
+            <td class="td-muted">{{ a.resolved_at[:16] if a.resolved_at!='Unknown' else '—' }}</td>
+            <td class="td-muted">{{ a.turnaround_minutes }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty"><div class="empty-icon">📋</div><p>No past alerts{% if search or campus_f %} matching your filter{% endif %}.</p></div>
+    {% endif %}
+    {% if total_pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}<a href="{{ url_for('past_alerts',page=page-1,q=search,campus=campus_f,incident_type=incident_f,severity=severity_f,officer=officer_f,date_from=date_from,date_to=date_to) }}" class="btn btn-ghost btn-sm">← Prev</a>{% endif %}
+      <span style="font-size:.8rem;">Page {{ page }} of {{ total_pages }}</span>
+      {% if page < total_pages %}<a href="{{ url_for('past_alerts',page=page+1,q=search,campus=campus_f,incident_type=incident_f,severity=severity_f,officer=officer_f,date_from=date_from,date_to=date_to) }}" class="btn btn-ghost btn-sm">Next →</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
